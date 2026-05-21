@@ -8,14 +8,14 @@
 #define mapHeight 25
 
 //хранение координатов
-typedef struct SObject {
-	float x, y;
-	float width, height;
-	float vertSpeed;
-	BOOL IsFly;
-	char cType;
-	float horizSpeed;
-} TObject;
+typedef struct {
+    float x, y;
+    float width, height;
+    float vertical_speed;
+    int is_flying;
+    char symbol;
+    float horizontal_speed;
+} GameObject;
 
 
 char map[mapHeight][mapWidth+1];
