@@ -222,11 +222,16 @@ BOOL IsCollision(TObject o1, TObject o2)
 	
 }
 
-TObject *GetNewBrick()
-{
-	brickLength++;
-	brick = (TObject*)realloc( brick, sizeof(*brick) * brickLength);
-	return brick + brickLength - 1;
+GameObject* add_brick(GameState* state) {
+    state->bricks_count++;
+    state->bricks = (GameObject*)realloc(state->bricks, sizeof(GameObject) * state->bricks_count);
+    return state->bricks + state->bricks_count - 1;
+}
+
+void delete_moving_object(GameState* state, int index) {
+    state->moving_objects_count--;
+    state->moving_objects[index] = state->moving_objects[state->moving_objects_count];
+    state->moving_objects = (GameObject*)realloc(state->moving_objects,sizeof(GameObject) * state->moving_objects_count);
 }
 
 TObject *GetNewMoving()
