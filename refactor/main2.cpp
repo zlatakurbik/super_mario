@@ -76,38 +76,38 @@ BOOL IsCollision(TObject o1, TObject o2);
 void CreateLevel(int lvl);
 TObject *GetNewMoving();
 
-void VertMoveObject(TObject *obj)
-{
-	(*obj).IsFly = TRUE;
-	(*obj).vertSpeed += 0.05;
-	SetObjectPos(obj, (*obj).x, (*obj).y + (*obj).vertSpeed);
-	
-	for (int i = 0; i < brickLength; i++)
-		if (IsCollision (*obj, brick[i]))
-		{
-			if (obj[0].vertSpeed > 0)
-				obj[0].IsFly = FALSE;
-			
-			if ( (brick[i].cType == '?') && (obj[0].vertSpeed < 0) && (obj == &mario) )
-			{
-				brick[i].cType = '-';
-				InitObject(GetNewMoving(), brick[i].x, brick[i].y-3, 3, 2, '$');
-				moving[movingLength - 1].vertSpeed = -0.7;
-			}
-			(*obj).y -= (*obj).vertSpeed;
-			(*obj).vertSpeed = 0;
-			if (brick[i].cType == '+')
-			{
-				level++;
-				if (level > maxLvl) level = 1;
-				
-				system("color 2F");
-				Sleep(500);
-				CreateLevel(level);
-				
-			}
-			break;
-		}
+void vertical_move_object(GameObject* obj, GameState* state) {
+    obj->is_flying = 1;               
+    obj->vertical_speed += 0.05;      
+    obj->y += obj->vertical_speed;    
+    //Проверяем столкновения
+    for (int i = 0; i < state->bricks_count; i++) {
+        if (check_collision(*obj, state->bricks[i])) {
+            if (obj->vertical_speed > 0) {
+                obj->is_flying = 0;   
+            }
+            
+            if (state->bricks[i].symbol == '?' && obj->vertical_speed < 0 && obj == &state->player) {
+                state->bricks[i].symbol = '-';  
+                
+                GameObject* new_obj = add_moving_object(state);
+                init_object(new_obj, state->bricks[i].x, state->bricks[i].y - 3, 3, 2, '$');
+                new_obj->vertical_speed = -0.7;  
+            }
+            obj->y -= obj->vertical_speed;
+            obj->vertical_speed = 0;
+            if (state->bricks[i].symbol == '+') {
+                state->level++;
+                if (state->level > state->max_level) {
+                    state->level = 1;  
+                }
+                system("color 2F");
+                Sleep(500);
+                create_level(state, state->level);  
+            }
+            break;
+        }
+    }
 }
 
 void DeleteMoving(int i)
