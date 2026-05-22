@@ -177,17 +177,19 @@ BOOL IsPosInMap(int x, int y)
 	return ((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight));
 }
 
-void PutObjectOnMap(TObject obj)
-{
-	int ix = (int)round(obj.x);
-	int iy = (int)round(obj.y);
-	int iWidth = (int)round(obj.width);
-	int iHeight = (int)round(obj.height);
-	
-	for (int i = ix; i < (ix + iWidth); i++)
-		for (int j = iy; j < (iy + iHeight); j++)
-			if (IsPosInMap(i,j))
-				map[j][i] = obj.cType;
+void put_object_on_map(GameObject obj, char map[MAP_HEIGHT][MAP_WIDTH + 1]) {
+    int ix = (int)round(obj.x);
+    int iy = (int)round(obj.y);
+    int iw = (int)round(obj.width);
+    int ih = (int)round(obj.height);
+    
+    for (int i = ix; i < ix + iw; i++) {
+        for (int j = iy; j < iy + ih; j++) {
+            if (i >= 0 && i < MAP_WIDTH && j >= 0 && j < MAP_HEIGHT) {
+                map[j][i] = obj.symbol;
+            }
+        }
+    }
 }	
 
 void setCur(int x, int y)
