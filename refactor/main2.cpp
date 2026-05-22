@@ -255,116 +255,124 @@ void PutScoreOnMap()
 }
 
 //создание всего уровня
-void CreateLevel(int lvl)
-{
-	system("color 9F");
-	
-	brickLength = 0;
-	brick = (TObject*)realloc( brick, 0);
-	movingLength = 0;
-	moving = (TObject*)realloc( moving, 0);
-	
-	InitObject(&mario, 39, 10, 3, 3, '@');
-	score = 0;
-	
-	if (lvl == 1)
-	{
-		InitObject(GetNewBrick(), 20, 20, 40, 5, '#');
-			InitObject(GetNewBrick(), 30, 10, 5, 3, '?');
-			InitObject(GetNewBrick(), 50, 10, 5, 3, '?');
-		InitObject(GetNewBrick(), 60, 15, 40, 10, '#');
-			InitObject(GetNewBrick(), 60, 5, 10, 3, '-');
-			InitObject(GetNewBrick(), 70, 5, 5, 3, '?');
-			InitObject(GetNewBrick(), 75, 5, 5, 3, '-');
-			InitObject(GetNewBrick(), 80, 5, 5, 3, '?');
-			InitObject(GetNewBrick(), 85, 5, 10, 3, '-');
-		InitObject(GetNewBrick(), 100, 20, 20, 5, '#');
-		InitObject(GetNewBrick(), 120, 15, 10, 10, '#');
-		InitObject(GetNewBrick(), 150, 20, 40, 5, '#');
-		InitObject(GetNewBrick(), 210, 15, 10, 10, '+');
-		
-		InitObject(GetNewMoving(), 25, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 80, 10, 3, 2, 'o');
-	}
-	if (lvl == 2)
-	{
-		brick = (TObject*)realloc( brick, sizeof(*brick) * brickLength);
-		
-		InitObject(GetNewBrick(), 20, 20, 40, 5, '#');
-		InitObject(GetNewBrick(), 60, 15, 10, 10, '#');
-		InitObject(GetNewBrick(), 80, 20, 20, 5, '#');
-		InitObject(GetNewBrick(), 120, 15, 10, 10, '#');
-		InitObject(GetNewBrick(), 150, 20, 40, 5, '#');
-		InitObject(GetNewBrick(), 210, 15, 10, 10, '+');
-
-		InitObject(GetNewMoving(), 25, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 80, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 65, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 120, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 160, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 175, 10, 3, 2, 'o');
-	}
-	if (lvl == 3)
-	{
-		InitObject(GetNewBrick(), 20, 20, 40, 5, '#');
-		InitObject(GetNewBrick(), 80, 20, 15, 5, '#');
-		InitObject(GetNewBrick(), 120, 15, 15, 10, '#');
-		InitObject(GetNewBrick(), 160, 10, 15, 15, '+');
-
-		InitObject(GetNewMoving(), 25, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 50, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 80, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 90, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 120, 10, 3, 2, 'o');
-		InitObject(GetNewMoving(), 130, 10, 3, 2, 'o');
-	}
-	
-	maxLvl = 3;
+void create_level(GameState* state, int level_num) {
+    system("color 9F");      
+    
+	//очистка памяти
+    free(state->bricks);
+    free(state->moving_objects);
+    state->bricks = NULL;
+    state->moving_objects = NULL;
+    state->bricks_count = 0;
+    state->moving_objects_count = 0;
+    
+	//инициализация
+    init_object(&state->player, 39, 10, 3, 3, '@');
+    state->score = 0;          
+    state->level = level_num;  
+    state->max_level = 3;      
+    
+    if (level_num == 1) {
+        init_object(add_brick(state), 20, 20, 40, 5, '#');
+        init_object(add_brick(state), 30, 10, 5, 3, '?');
+        init_object(add_brick(state), 50, 10, 5, 3, '?');
+        init_object(add_brick(state), 60, 15, 40, 10, '#');
+        init_object(add_brick(state), 60, 5, 10, 3, '-');
+        init_object(add_brick(state), 70, 5, 5, 3, '?');
+        init_object(add_brick(state), 75, 5, 5, 3, '-');
+        init_object(add_brick(state), 80, 5, 5, 3, '?');
+        init_object(add_brick(state), 85, 5, 10, 3, '-');
+        init_object(add_brick(state), 100, 20, 20, 5, '#');
+        init_object(add_brick(state), 120, 15, 10, 10, '#');
+        init_object(add_brick(state), 150, 20, 40, 5, '#');
+        init_object(add_brick(state), 210, 15, 10, 10, '+');         
+        init_object(add_moving_object(state), 25, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 80, 10, 3, 2, 'o');
+    }
+    
+    if (level_num == 2) {
+        init_object(add_brick(state), 20, 20, 40, 5, '#');
+        init_object(add_brick(state), 60, 15, 10, 10, '#');
+        init_object(add_brick(state), 80, 20, 20, 5, '#');
+        init_object(add_brick(state), 120, 15, 10, 10, '#');
+        init_object(add_brick(state), 150, 20, 40, 5, '#');
+        init_object(add_brick(state), 210, 15, 10, 10, '+');
+        
+        init_object(add_moving_object(state), 25, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 80, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 65, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 120, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 160, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 175, 10, 3, 2, 'o');
+    }
+    
+    if (level_num == 3) {
+        init_object(add_brick(state), 20, 20, 40, 5, '#');
+        init_object(add_brick(state), 80, 20, 15, 5, '#');
+        init_object(add_brick(state), 120, 15, 15, 10, '#');
+        init_object(add_brick(state), 160, 10, 15, 15, '+');
+        
+        init_object(add_moving_object(state), 25, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 50, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 80, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 90, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 120, 10, 3, 2, 'o');
+        init_object(add_moving_object(state), 130, 10, 3, 2, 'o');
+    }
 }
 
-int main()
-{
-	GameState game;
-	game.bricks = NULL;
-	game.moving_objects = NULL;
+int main() {
+    GameState game;                     
+    char map[MAP_HEIGHT][MAP_WIDTH + 1];  
 	
-	do
-	{
-		ClearMap();
-		
-		if ( (mario.IsFly == FALSE) && (GetKeyState(VK_SPACE) < 0) ) mario.vertSpeed = -1;
-		if (GetKeyState('A') < 0) HorizonMoveMap(1);
-		if (GetKeyState('D') < 0) HorizonMoveMap(-1);
-		
-		if (mario.y > mapHeight) PlayerDead();
-		
-		
-		VertMoveObject(&mario);
-		MarioCollision();
-		
-		for (int i = 0; i < brickLength; i++)
-			PutObjectOnMap(brick[i]);
-		for (int i = 0; i < movingLength; i++)
-		{
-			VertMoveObject(moving + i);
-			HorizonMoveObject(moving + i);
-			if (moving[i].y > mapHeight)
-			{
-				DeleteMoving(i);
-				i--;
-				continue;
-			}
-			PutObjectOnMap(moving[i]);
-		}
-		PutObjectOnMap(mario);
-		PutScoreOnMap();
-		
-		setCur(0,0);
-		ShowMap();
-		
-		Sleep(10);
-	}
-	while (GetKeyState(VK_ESCAPE) >= 0);
-	
-	return 0;
+	//инициализация
+    game.bricks = NULL;
+    game.moving_objects = NULL;
+    game.bricks_count = 0;
+    game.moving_objects_count = 0;
+    game.level = 1;
+    game.score = 0;
+    game.max_level = 3;
+    
+    create_level(&game, game.level);
+    do {
+        clear_map(map); 
+        
+        if (game.player.is_flying == 0 && GetKeyState(VK_SPACE) < 0) {
+            game.player.vertical_speed = -1;
+        }
+        if (GetKeyState('A') < 0) {
+            horizontal_move_map(&game, 1);
+        }
+        if (GetKeyState('D') < 0) {
+            horizontal_move_map(&game, -1);
+        }
+        if (game.player.y > MAP_HEIGHT) {
+            player_dead(&game);
+        }
+        vertical_move_object(&game.player, &game);
+        check_player_collision(&game);
+        for (int i = 0; i < game.bricks_count; i++) {
+            put_object_on_map(game.bricks[i], map);
+        }
+        for (int i = 0; i < game.moving_objects_count; i++) {
+            vertical_move_object(&game.moving_objects[i], &game);
+            horizontal_move_moving_object(&game.moving_objects[i], &game);
+            if (game.moving_objects[i].y > MAP_HEIGHT) {
+                delete_moving_object(&game, i);
+                i--;
+                continue;
+            }
+            put_object_on_map(game.moving_objects[i], map);
+        }
+        put_object_on_map(game.player, map);
+        put_score_on_map(game.score, map);
+        
+        set_cursor(0, 0);
+        show_map(map);
+        
+        Sleep(10);  
+    } while (GetKeyState(VK_ESCAPE) >= 0);  
+    
+    return 0;
 }
