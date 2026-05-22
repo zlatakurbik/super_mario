@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <math.h>
 #include <windows.h>
 
-#define mapWidth 80
-#define mapHeight 25
+#define MAP_WIDTH 80
+#define MAP_HEIGHT 25
 
 //хранение координатов
 typedef struct {
@@ -17,9 +16,7 @@ typedef struct {
     float horizontal_speed;
 } GameObject;
 
-
-char map[mapHeight][mapWidth+1];
-
+//хранение всей структуры игры
 typedef struct {
     GameObject player;
     GameObject* bricks;
@@ -31,51 +28,122 @@ typedef struct {
     int max_level;
 } GameState;
 
-void ClearMap()
-{
-	for (int i = 0; i < mapWidth; i++)
-		map [0][i] = ' ';
-	map[0][mapWidth] = '\0';
-	for (int j = 0; j < mapHeight; j++)
-		sprintf( map[j], map[0]);
+//Объявление прототипов функций перед использованием
+void clear_map(char map[MAP_HEIGHT][MAP_WIDTH + 1]);
+void show_map(char map[MAP_HEIGHT][MAP_WIDTH + 1]);
+void set_cursor(int x, int y);
+void init_object(GameObject* obj, float x, float y, float w, float h, char symbol);
+int check_collision(GameObject o1, GameObject o2);
+void put_object_on_map(GameObject obj, char map[MAP_HEIGHT][MAP_WIDTH + 1]);
+void put_score_on_map(int score, char map[MAP_HEIGHT][MAP_WIDTH + 1]);
+GameObject* add_brick(GameState* state);
+GameObject* add_moving_object(GameState* state);
+void delete_moving_object(GameState* state, int index);
+void horizontal_move_map(GameState* state, float dx);
+void vertical_move_object(GameObject* obj, GameState* state);
+void horizontal_move_moving_object(GameObject* obj, GameState* state);
+void check_player_collision(GameState* state);
+void player_dead(GameState* state);
+void create_level(GameState* state, int level_num);
+
+void clear_map(char map[MAP_HEIGHT][MAP_WIDTH + 1]) {
+    for (int i = 0; i < MAP_WIDTH; i++) {
+        map[0][i] = ' ';
+    }
+    map[0][MAP_WIDTH] = '\0'; 
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        sprintf(map[i], map[0]);
+    }
 }
 
-void ShowMap()
-{
-	map[mapHeight - 1][mapWidth - 1] = '\0';
-	for (int j = 0; j < mapHeight; j++)
-		printf("%s\n", map[j]);
+void show_map(char map[MAP_HEIGHT][MAP_WIDTH + 1]){
+	map[MAP_HEIGHT - 1][MAP_WIDTH - 1] = '\0';  
+    for (int i = 0; i < MAP_HEIGHT; i++) {
+        printf("%s\n", map[i]);  
+    }
 }
-
 //позиция персонажа
-void SetObjectPos(TObject *obj, float xPos, float yPos)
-{
-	(*obj).x = xPos;
-	(*obj).y = yPos;
+void set_cursor(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-void InitObject(TObject *obj, float xPos, float yPos, float oWidth, float oHeight, char inType)
-{
-	SetObjectPos(obj, xPos, yPos);
-	(*obj).width = oWidth;
-	(*obj).height = oHeight;
-	(*obj).vertSpeed = 0;
-	(*obj).cType = inType;
-	(*obj).horizSpeed = 0.2;
+void init_object(GameObject* obj, float x, float y, float w, float h, char symbol) {
+    obj[0].x = x;                   
+    obj[0].y = y;                   
+    obj[0].width = w;               
+    obj[0].height = h;             
+    obj[0].vertical_speed = 0;     
+    obj[0].symbol = symbol;        
+    obj[0].horizontal_speed = 0.2; 
+    obj[0].is_flying = 0;          
 }
 
-void PlayerDead()
-{
-	system("color 4F");
-	Sleep(500);
-	CreateLevel(level);
+int check_collision(GameObject o1, GameObject o2) {
+    return ((o1.x + o1.width) > o2.x) && (o1.x < (o2.x + o2.width)) &&
+           ((o1.y + o1.height) > o2.y) && (o1.y < (o2.y + o2.height));
 }
 
+void put_object_on_map(GameObject obj, char map[MAP_HEIGHT][MAP_WIDTH + 1]) {
+    int ix = (int)round(obj.x);
+    int iy = (int)round(obj.y);
+    int iw = (int)round(obj.width);
+    int ih = (int)round(obj.height);
+    
+    for (int i = ix; i < ix + iw; i++) {
+        for (int j = iy; j < iy + ih; j++) {
+            if (i >= 0 && i < MAP_WIDTH && j >= 0 && j < MAP_HEIGHT) {
+                map[j][i] = obj.symbol;
+            }
+        }
+    }
+}
 
-BOOL IsCollision(TObject o1, TObject o2);
-void CreateLevel(int lvl);
-TObject *GetNewMoving();
+void put_score_on_map(int score, char map[MAP_HEIGHT][MAP_WIDTH + 1]) {
+    char buffer[30];
+    sprintf(buffer, "Score: %d", score); 
+    int len = strlen(buffer);
+    for (int i = 0; i < len; i++) {
+        map[1][i + 5] = buffer[i];
+    }
+}
 
+GameObject* add_brick(GameState* state) {
+    state->bricks_count++;
+    state->bricks = (GameObject*)realloc(state->bricks, sizeof(GameObject) * state->bricks_count);
+    return state->bricks + state->bricks_count - 1;
+}
+GameObject* add_moving_object(GameState* state) {
+    state->moving_objects_count++;  
+    state->moving_objects = (GameObject*)realloc(state->moving_objects, sizeof(GameObject) * state->moving_objects_count);
+    return state->moving_objects + state->moving_objects_count - 1;
+}
+
+void delete_moving_object(GameState* state, int index) {
+    state->moving_objects_count--;
+    state->moving_objects[index] = state->moving_objects[state->moving_objects_count];
+    state->moving_objects = (GameObject*)realloc(state->moving_objects,sizeof(GameObject) * state->moving_objects_count);
+}
+
+//Движение карты
+void horizontal_move_map(GameState* state, float dx) {
+    state->player.x -= dx;
+    for (int i = 0; i < state->bricks_count; i++) {
+        if (check_collision(state->player, state->bricks[i])) {
+            state->player.x += dx;  
+            return;
+        }
+    }
+    state->player.x += dx; 
+    for (int i = 0; i < state->bricks_count; i++) {
+        state->bricks[i].x += dx;
+    }
+    for (int i = 0; i < state->moving_objects_count; i++) {
+        state->moving_objects[i].x += dx;
+    }
+}
 void vertical_move_object(GameObject* obj, GameState* state) {
     obj->is_flying = 1;               
     obj->vertical_speed += 0.05;      
@@ -110,148 +178,61 @@ void vertical_move_object(GameObject* obj, GameState* state) {
     }
 }
 
-void DeleteMoving(int i)
-{
-	movingLength--;
-	moving[i] = moving[movingLength];
-	moving = (TObject*)realloc( moving, sizeof(*moving) * movingLength );
-}
-
-void MarioCollision()
-{
-	for (int i = 0; i < movingLength; i++)
-		if (IsCollision(mario, moving[i]))
-		{
-			if (moving[i].cType == 'o')
-			{
-				if ((mario.IsFly == TRUE)
-					&& (mario.vertSpeed > 0)
-					&& (mario.y + mario.height < moving[i].y + moving[i].height * 0.5)
-					)
-				{
-					score += 50;
-					DeleteMoving(i);
-					i--;
-					continue;
-				}
-				else 
-					PlayerDead();
-			}
-			
-			if (moving[i].cType == '$')
-			{
-				score += 100;
-				DeleteMoving(i);
-				i--;
-				continue;
-			}
-		}
-}
-
-void HorizonMoveObject(TObject *obj)
-{
-	obj[0].x += obj[0].horizSpeed;
-	
-	for (int i = 0; i < brickLength; i++)
-		if (IsCollision(obj[0], brick[i]))
-		{
-			obj[0].x -= obj[0].horizSpeed;
-			obj[0].horizSpeed = -obj[0].horizSpeed;
-			return;
-		}
-	
-	if (obj[0].cType == 'o')
-	{
-		TObject tmp = *obj;
-		VertMoveObject(&tmp);
-		if (tmp.IsFly == TRUE)
-		{
-			obj[0].x -= obj[0].horizSpeed;
-			obj[0].horizSpeed = -obj[0].horizSpeed;
-		}
-	}
-}
-
-BOOL IsPosInMap(int x, int y)
-{
-	return ((x >= 0) && (x < mapWidth) && (y >= 0) && (y < mapHeight));
-}
-
-void put_object_on_map(GameObject obj, char map[MAP_HEIGHT][MAP_WIDTH + 1]) {
-    int ix = (int)round(obj.x);
-    int iy = (int)round(obj.y);
-    int iw = (int)round(obj.width);
-    int ih = (int)round(obj.height);
+void horizontal_move_moving_object(GameObject* obj, GameState* state) {
+    obj->x += obj->horizontal_speed; 
+    //Столкновение с блоками
+    for (int i = 0; i < state->bricks_count; i++) {
+        if (check_collision(*obj, state->bricks[i])) {
+            obj->x -= obj->horizontal_speed;          
+            obj->horizontal_speed = -obj->horizontal_speed;  
+            return;
+        }
+    }
     
-    for (int i = ix; i < ix + iw; i++) {
-        for (int j = iy; j < iy + ih; j++) {
-            if (i >= 0 && i < MAP_WIDTH && j >= 0 && j < MAP_HEIGHT) {
-                map[j][i] = obj.symbol;
+    //'o', не падают ли они в пустоту
+    if (obj->symbol == 'o') {
+        GameObject temp = *obj;
+        vertical_move_object(&temp, state); 
+        if (temp.is_flying == 1) {          
+            obj->x -= obj->horizontal_speed; 
+            obj->horizontal_speed = -obj->horizontal_speed; 
+        }
+    }
+}
+
+//Столкновения с объектами
+void check_player_collision(GameState* state) {
+    for (int i = 0; i < state->moving_objects_count; i++) {
+        if (check_collision(state->player, state->moving_objects[i])) {
+            
+            if (state->moving_objects[i].symbol == 'o') {
+                if (state->player.is_flying == 1 &&
+                    state->player.vertical_speed > 0 &&
+                    state->player.y + state->player.height < 
+                    state->moving_objects[i].y + state->moving_objects[i].height * 0.5) {
+                    state->score += 50;           
+                    delete_moving_object(state, i);  
+                    i--;
+                    continue;
+                } else {
+                    player_dead(state); 
+					}
+            }
+            
+            if (state->moving_objects[i].symbol == '$') {
+                state->score += 100;              
+                delete_moving_object(state, i);   
+                i--;
+                continue;
             }
         }
     }
-}	
-
-void setCur(int x, int y)
-{
-	COORD coord;
-	coord.X = x;
-	coord.Y = y;
-	SetConsoleCursorPosition( GetStdHandle(STD_OUTPUT_HANDLE), coord );
 }
 
-void HorizonMoveMap(float dx)
-{
-	mario.x -= dx;
-	for (int i = 0; i < brickLength; i++)
-		if (IsCollision(mario, brick[i]))
-		{
-			mario.x += dx;
-			return;
-		}
-	mario.x += dx;
-	
-	for (int i = 0; i < brickLength; i++)
-		brick[i].x +=dx;
-	for (int i = 0; i < movingLength; i++)
-		moving[i].x +=dx;
-}
-
-BOOL IsCollision(TObject o1, TObject o2)
-{
-	return ((o1.x + o1.width) > o2.x) && (o1.x < (o2.x + o2.width)) &&
-	((o1.y + o1.height) > o2.y) && (o1.y < (o2.y + o2.height));
-	
-}
-
-GameObject* add_brick(GameState* state) {
-    state->bricks_count++;
-    state->bricks = (GameObject*)realloc(state->bricks, sizeof(GameObject) * state->bricks_count);
-    return state->bricks + state->bricks_count - 1;
-}
-
-void delete_moving_object(GameState* state, int index) {
-    state->moving_objects_count--;
-    state->moving_objects[index] = state->moving_objects[state->moving_objects_count];
-    state->moving_objects = (GameObject*)realloc(state->moving_objects,sizeof(GameObject) * state->moving_objects_count);
-}
-
-TObject *GetNewMoving()
-{
-	movingLength++;
-	moving = (TObject*)realloc( moving, sizeof(*moving) * movingLength);
-	return moving + movingLength - 1;
-}
-
-void PutScoreOnMap()
-{
-	char c[30];
-	sprintf(c, "Score: %d", score);
-	int len = strlen(c);
-	for (int i = 0; i < len; i++)
-	{
-		map[1][i+5] = c[i];
-	}
+void player_dead(GameState* state) {
+    system("color 4F");  
+    Sleep(500);          
+    create_level(state, state->level);  
 }
 
 //создание всего уровня
