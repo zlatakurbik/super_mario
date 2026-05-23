@@ -6,6 +6,11 @@
 #define MAP_WIDTH 80
 #define MAP_HEIGHT 25
 
+// TODO
+// 1. Разделить BaseObject на два класса: BaseObject и MovingObject, который наследуется от BaseObject
+// 2. Создать класс Board, который содержит char map[MAP_HEIGHT][MAP_WIDTH + 1]; и отображает передаваемые ему объекты.
+
+
 //базовый класс для всех объектов 
 class BaseObject {
 protected:
@@ -84,7 +89,7 @@ public:
 //класс игрока
 class Player : public BaseObject {
 public:
-    Player() : BaseObject(39, 10, 3, 3, '@') {}
+    Player() : BaseObject(39, 10, 3, 3, '9') {}
     
     void jump() {
         if (!is_flying) {

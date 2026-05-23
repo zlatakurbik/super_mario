@@ -11,7 +11,6 @@
 // 2. Делить на короткие строки длинные строки
 // 3. create_level: if -> switch
 
-
 //хранение координатов
 typedef struct {
     float x, y;
