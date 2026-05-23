@@ -6,6 +6,12 @@
 #define MAP_WIDTH 80
 #define MAP_HEIGHT 25
 
+// TODO
+// 1. Перенести глобальные изменяемые переменные в main и исправить функции
+// 2. Делить на короткие строки длинные строки
+// 3. create_level: if -> switch
+
+
 //хранение координатов
 typedef struct {
     float x, y;
@@ -15,18 +21,6 @@ typedef struct {
     char symbol;
     float horizontal_speed;
 } GameObject;
-
-//хранение всей структуры игры
-typedef struct {
-    GameObject player;
-    GameObject* bricks;
-    int bricks_count;
-    GameObject* moving_objects;
-    int moving_objects_count;
-    int level;
-    int score;
-    int max_level;
-} GameState;
 
 //Объявление прототипов функций перед использованием
 void clear_map(char map[MAP_HEIGHT][MAP_WIDTH + 1]);
@@ -45,6 +39,72 @@ void horizontal_move_moving_object(GameObject* obj, GameState* state);
 void check_player_collision(GameState* state);
 void player_dead(GameState* state);
 void create_level(GameState* state, int level_num);
+
+int main() {
+    GameState game;                     
+    char map[MAP_HEIGHT][MAP_WIDTH + 1];  
+	
+	//инициализация
+	
+    GameObject player;
+    GameObject* bricks;
+    int bricks_count;
+    GameObject* moving_objects;
+    int moving_objects_count;
+    int level;
+    int score;
+    int max_level;
+	
+    bricks = NULL;
+    moving_objects = NULL;
+    bricks_count = 0;
+    moving_objects_count = 0;
+    level = 1;
+    score = 0;
+    max_level = 3;
+    
+    create_level(&game, level);
+    do {
+        clear_map(map); 
+        
+        if (player.is_flying == 0 && GetKeyState(VK_SPACE) < 0) {
+            player.vertical_speed = -1;
+        }
+        if (GetKeyState('A') < 0) {
+            horizontal_move_map(&game, 1);
+        }
+        if (GetKeyState('D') < 0) {
+            horizontal_move_map(&game, -1);
+        }
+        if (player.y > MAP_HEIGHT) {
+            player_dead(&game);
+        }
+        vertical_move_object(&player, &game);
+        check_player_collision(&game);
+        for (int i = 0; i < bricks_count; i++) {
+            put_object_on_map(bricks[i], map);
+        }
+        for (int i = 0; i < moving_objects_count; i++) {
+            vertical_move_object(&moving_objects[i], &game);
+            horizontal_move_moving_object(&moving_objects[i], &game);
+            if (moving_objects[i].y > MAP_HEIGHT) {
+                delete_moving_object(&game, i);
+                i--;
+                continue;
+            }
+            put_object_on_map(moving_objects[i], map);
+        }
+        put_object_on_map(player, map);
+        put_score_on_map(score, map);
+        
+        set_cursor(0, 0);
+        show_map(map);
+        
+        Sleep(10);  
+    } while (GetKeyState(VK_ESCAPE) >= 0);  
+    
+    return 0;
+}
 
 void clear_map(char map[MAP_HEIGHT][MAP_WIDTH + 1]) {
     for (int i = 0; i < MAP_WIDTH; i++) {
@@ -124,7 +184,9 @@ GameObject* add_moving_object(GameState* state) {
 void delete_moving_object(GameState* state, int index) {
     state->moving_objects_count--;
     state->moving_objects[index] = state->moving_objects[state->moving_objects_count];
-    state->moving_objects = (GameObject*)realloc(state->moving_objects,sizeof(GameObject) * state->moving_objects_count);
+    state->moving_objects = (GameObject*)realloc(
+		state->moving_objects,
+		sizeof(GameObject) * state->moving_objects_count);
 }
 
 //Движение карты
@@ -155,7 +217,10 @@ void vertical_move_object(GameObject* obj, GameState* state) {
                 obj->is_flying = 0;   
             }
             
-            if (state->bricks[i].symbol == '?' && obj->vertical_speed < 0 && obj == &state->player) {
+            if (state->bricks[i].symbol == '?' && 
+				obj->vertical_speed < 0 && 
+				obj == &state->player
+			) {
                 state->bricks[i].symbol = '-';  
                 
                 GameObject* new_obj = add_moving_object(state);
@@ -253,6 +318,7 @@ void create_level(GameState* state, int level_num) {
     state->level = level_num;  
     state->max_level = 3;      
     
+	// TODO switch
     if (level_num == 1) {
         init_object(add_brick(state), 20, 20, 40, 5, '#');
         init_object(add_brick(state), 30, 10, 5, 3, '?');
@@ -302,58 +368,3 @@ void create_level(GameState* state, int level_num) {
     }
 }
 
-int main() {
-    GameState game;                     
-    char map[MAP_HEIGHT][MAP_WIDTH + 1];  
-	
-	//инициализация
-    game.bricks = NULL;
-    game.moving_objects = NULL;
-    game.bricks_count = 0;
-    game.moving_objects_count = 0;
-    game.level = 1;
-    game.score = 0;
-    game.max_level = 3;
-    
-    create_level(&game, game.level);
-    do {
-        clear_map(map); 
-        
-        if (game.player.is_flying == 0 && GetKeyState(VK_SPACE) < 0) {
-            game.player.vertical_speed = -1;
-        }
-        if (GetKeyState('A') < 0) {
-            horizontal_move_map(&game, 1);
-        }
-        if (GetKeyState('D') < 0) {
-            horizontal_move_map(&game, -1);
-        }
-        if (game.player.y > MAP_HEIGHT) {
-            player_dead(&game);
-        }
-        vertical_move_object(&game.player, &game);
-        check_player_collision(&game);
-        for (int i = 0; i < game.bricks_count; i++) {
-            put_object_on_map(game.bricks[i], map);
-        }
-        for (int i = 0; i < game.moving_objects_count; i++) {
-            vertical_move_object(&game.moving_objects[i], &game);
-            horizontal_move_moving_object(&game.moving_objects[i], &game);
-            if (game.moving_objects[i].y > MAP_HEIGHT) {
-                delete_moving_object(&game, i);
-                i--;
-                continue;
-            }
-            put_object_on_map(game.moving_objects[i], map);
-        }
-        put_object_on_map(game.player, map);
-        put_score_on_map(game.score, map);
-        
-        set_cursor(0, 0);
-        show_map(map);
-        
-        Sleep(10);  
-    } while (GetKeyState(VK_ESCAPE) >= 0);  
-    
-    return 0;
-}
