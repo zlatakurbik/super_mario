@@ -1,0 +1,17 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/os_controls/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/os_controls/os_api/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/controller/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/levels/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/model/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/objects/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/ui/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/ui/console/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/ui/console/ui_objects/cmake_install.cmake",
+		"C:/Users/zlata/Downloads/_IT/code/13-12/super_mario/src/build/util/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
