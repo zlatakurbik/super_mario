@@ -1,7 +1,3 @@
-/**
-	- Как объекты раскладываются по контейнерам?
-*/
-
 #pragma once
 
 #include <vector>
@@ -11,6 +7,7 @@
 #include "mario.hpp"
 #include "movable.hpp"
 #include "rect.hpp"
+#include "moving_collisionable.hpp"
 
 namespace biv {
 	class Game {
@@ -19,6 +16,7 @@ namespace biv {
 			std::vector<Rect*> static_objs;
 			std::vector<Collisionable*> collisionable_objs;
 			std::vector<Movable*> movable_objs;
+			std::vector<MovingCollisionable*> moving_collisionable_objs;
 			
 			Mario* mario = nullptr;
 			
@@ -33,11 +31,13 @@ namespace biv {
 			void add_mario(Mario*);
 			void add_movable(Movable*);
 			void add_static_obj(Rect*);
+			void add_movable_collisionable(MovingCollisionable* obj);
 			
 			void check_horizontally_static_collisions() noexcept;
 			void check_mario_collision();
 			bool check_static_collisions(Collisionable* obj) const noexcept;
 			void check_vertically_static_collisions() noexcept;
+			void check_movable_collisionable() noexcept;
 			
 			void finish() noexcept;
 			
@@ -55,6 +55,7 @@ namespace biv {
 			void remove_movable(Movable*);
 			void remove_objs();
 			void remove_static_obj(Rect*);
+			void remove_moving_collisionable(MovingCollisionable*);
 			
 			void start_level() noexcept;
 

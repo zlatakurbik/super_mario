@@ -1,6 +1,7 @@
 #include "mario.hpp"
 
 #include "map_movable.hpp"
+#include "moving_platform.hpp"
 
 using biv::Mario;
 
@@ -32,11 +33,28 @@ void Mario::process_mario_collision(Collisionable* mario) noexcept {}
 
 void Mario::process_vertical_static_collision(Rect* obj) noexcept {
 	if (vspeed > 0) {
-		// Марио упал на корабль.
+		// Марио упал на корабль
 		top_left.y -= vspeed;
 	} else if (vspeed < 0) {
-		// Марио ударился головой о полку и после этого должен падать вниз.
+		// Марио ударился головой о полку и после этого должен падать вниз
 		top_left.y -= vspeed;
 	}
+	vspeed = 0;
+}
+
+void Mario::process_vertical_object_moving_collisionable(MovingCollisionable* obj) noexcept {
+    if (vspeed > 0) {
+        top_left.y -= vspeed;
+        //vspeed = 0;
+        
+        //float y_speed_of_object= obj->get_speed().v;
+        //float x_speed_of_object = obj->get_speed().h;
+
+        //top_left.y += y_speed_of_object;
+        //top_left.x += x_speed_of_object;
+		
+		top_left.x = obj->get_x();
+        
+    }
 	vspeed = 0;
 }

@@ -13,9 +13,6 @@ bool GameLevel::is_final() const noexcept {
 	return false;
 }
 
-// ----------------------------------------------------------------------------
-// 									PROTECTED
-// ----------------------------------------------------------------------------
 void GameLevel::clear_data() {
 	ui_factory->clear_data();
 }

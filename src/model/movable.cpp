@@ -32,9 +32,6 @@ void Movable::move_vertical_offset(const float offset) noexcept {
 	top_left.y += offset;
 }
 
-// ----------------------------------------------------------------------------
-// 									VIRTUAL
-// ----------------------------------------------------------------------------
 void Movable::move_horizontally() noexcept {
 	top_left.x += hspeed;
 }

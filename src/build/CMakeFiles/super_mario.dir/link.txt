@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\super_mario.dir/objects.a
-C:\Users\zlata\Downloads\_IT\code\install\mingw64\bin\ar.exe qc CMakeFiles\super_mario.dir/objects.a @CMakeFiles\super_mario.dir\objects1.rsp
-C:\Users\zlata\Downloads\_IT\code\install\mingw64\bin\c++.exe -finput-charset=utf-8 -fexec-charset=utf-8 -Wl,--whole-archive CMakeFiles\super_mario.dir/objects.a -Wl,--no-whole-archive -o super_mario.exe -Wl,--out-implib,libsuper_mario.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\super_mario.dir\linkLibs.rsp

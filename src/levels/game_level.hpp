@@ -1,12 +1,4 @@
 #pragma once
-
-/**
-	- На какую структуру данных похож класс GameLevel?
-	- В чём это выражается?
-	- Можно ли создавать экземпляры класса GameLevel и почему?
-	- В чём + и - конструкции GameLevel?
-*/
-
 #include <cstddef>
 
 #include "ui_factory.hpp"

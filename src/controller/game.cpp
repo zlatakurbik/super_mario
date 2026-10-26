@@ -26,6 +26,10 @@ void Game::add_static_obj(Rect* obj) {
 	static_objs.push_back(obj);
 }
 
+void Game::add_movable_collisionable(MovingCollisionable* obj) {
+	moving_collisionable_objs.push_back(obj);
+}
+
 void Game::check_horizontally_static_collisions() noexcept {
 	for (Collisionable* obj: collisionable_objs) {
 		for (Rect* static_obj: static_objs) {
@@ -45,7 +49,6 @@ void Game::check_mario_collision() {
 			if (!mario->is_active()) {
 				break;
 			} else if (!obj->is_active()) {
-				// TODO
 				collisionable_objs[i] = collisionable_objs.back();
 				collisionable_objs.pop_back();
 				i--;
@@ -53,6 +56,16 @@ void Game::check_mario_collision() {
 		}
 	}
 }
+
+void Game::check_movable_collisionable() noexcept {
+    for (MovingCollisionable* obj : moving_collisionable_objs) {
+        if (obj->has_collision(mario)) {
+            mario->process_vertical_object_moving_collisionable(obj);
+			break;
+        }
+    }
+}
+
 
 bool Game::check_static_collisions(Collisionable* obj) const noexcept {
 	for (Rect* static_obj: static_objs) {
@@ -129,6 +142,10 @@ void Game::remove_mario() noexcept {
 void Game::remove_movable(Movable* obj) {
 	remove_obj(movable_objs, obj);
 }
+void Game::remove_moving_collisionable(MovingCollisionable* obj) {
+	remove_obj(moving_collisionable_objs, obj);
+}
+
 
 void Game::remove_objs() {
 	collisionable_objs.clear();
@@ -146,9 +163,6 @@ void Game::start_level() noexcept {
 	is_level_end_ = false;
 }
 
-// ----------------------------------------------------------------------------
-// 									PRIVATE
-// ----------------------------------------------------------------------------
 template<class T>
 void Game::remove_obj(std::vector<T*>& container, T* obj) {
 	container.erase(

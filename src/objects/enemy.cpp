@@ -40,6 +40,7 @@ void Enemy::process_vertical_static_collision(Rect* obj) noexcept {
 		top_left.x -= hspeed;
 	}
 	
+	// Особенность модели вертикального передвижения в игры
 	if (vspeed > 0) {
 		top_left.y -= vspeed;
 		vspeed = 0;

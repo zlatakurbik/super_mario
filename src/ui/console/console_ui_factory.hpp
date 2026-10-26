@@ -2,11 +2,14 @@
 
 #include "console_box.hpp"
 #include "console_enemy.hpp"
+#include "console_flyable_enemy.hpp"
+#include "console_jumping_enemy.hpp"
 #include "console_full_box.hpp"
 #include "console_game_map.hpp"
 #include "console_mario.hpp"
 #include "console_money.hpp"
 #include "console_ship.hpp"
+#include "console_moving_platform.hpp" 
 #include "ui_factory.hpp"
 
 namespace biv {
@@ -18,7 +21,10 @@ namespace biv {
 			std::vector<ConsoleShip*> ships;
 			ConsoleMario* mario = nullptr;
 			std::vector<ConsoleEnemy*> enemies;
+			std::vector<ConsoleFlyableEnemy*> flyable_enemies;
+			std::vector<ConsoleJumpingEnemy*> jumping_enemies;
 			std::vector<ConsoleMoney*> moneys;
+			std::vector<ConsoleMovingPlatform*> moving_platforms;
 
 		public:
 			ConsoleUIFactory(Game* game);
@@ -27,7 +33,16 @@ namespace biv {
 			void create_box(
 				const Coord& top_left, const int width, const int height
 			) override;
+			void create_moving_platform(
+				const Coord& top_left, const int width, const int height
+			) override;
 			void create_enemy(
+				const Coord& top_left, const int width, const int height
+			) override;
+			void create_flyable_enemy(
+				const Coord& top_left, const int width, const int height
+			) override;
+			void create_jumping_enemy(
 				const Coord& top_left, const int width, const int height
 			) override;
 			void create_full_box(

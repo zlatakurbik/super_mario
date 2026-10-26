@@ -10,9 +10,12 @@ void ConsoleUIFactory::clear_data() {
 	delete mario;
 	mario = nullptr;
 	boxes.clear();
+	moving_platforms.clear();
 	full_boxes.clear();
 	ships.clear();
 	enemies.clear();
+	flyable_enemies.clear();
+	jumping_enemies.clear();
 	moneys.clear();
 }
 
@@ -26,6 +29,18 @@ void ConsoleUIFactory::create_box(
 	game_map->add_obj(box);
 }
 
+void ConsoleUIFactory::create_moving_platform(
+	const Coord& top_left, const int width, const int height
+) {
+	ConsoleMovingPlatform* moving_platform = new ConsoleMovingPlatform(top_left, width, height);
+	moving_platforms.push_back(moving_platform);
+	game->add_map_movable(moving_platform);
+	game->add_movable(moving_platform);
+	game->add_collisionable(moving_platform);
+	game->add_movable_collisionable(moving_platform);
+	game_map->add_obj(moving_platform);
+}
+
 void ConsoleUIFactory::create_enemy(
 	const Coord& top_left, const int width, const int height
 ) {
@@ -36,6 +51,30 @@ void ConsoleUIFactory::create_enemy(
 	game->add_collisionable(enemy);
 	game_map->add_obj(enemy);
 }
+
+void ConsoleUIFactory::create_flyable_enemy(
+	const Coord& top_left, const int width, const int height
+) {
+	ConsoleFlyableEnemy* flyable_enemy = new ConsoleFlyableEnemy(top_left, width, height);
+	flyable_enemies.push_back(flyable_enemy);
+	game->add_map_movable(flyable_enemy);
+	game->add_movable(flyable_enemy);
+	game->add_collisionable(flyable_enemy);
+	game->add_movable_collisionable(flyable_enemy);
+	game_map->add_obj(flyable_enemy);
+}
+
+void ConsoleUIFactory::create_jumping_enemy(
+	const Coord& top_left, const int width, const int height
+) {
+	ConsoleJumpingEnemy* jumping_enemy = new ConsoleJumpingEnemy(top_left, width, height);
+	jumping_enemies.push_back(jumping_enemy);
+	game->add_map_movable(jumping_enemy);
+	game->add_movable(jumping_enemy);
+	game->add_collisionable(jumping_enemy);
+	game_map->add_obj(jumping_enemy);
+}
+
 
 void ConsoleUIFactory::create_full_box(
 	const Coord& top_left, const int width, const int height
@@ -96,3 +135,4 @@ biv::GameMap* ConsoleUIFactory::get_game_map(const int height, const int width) 
 biv::Mario* ConsoleUIFactory::get_mario() {
 	return mario;
 }
+ 

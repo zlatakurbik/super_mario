@@ -29,6 +29,8 @@ void Money::process_mario_collision(Collisionable* mario) noexcept {
 
 void Money::process_vertical_static_collision(Rect* obj) noexcept {
 	// Деньги могут свалиться с корабля
+	
+	// Особенность модели вертикального передвижения в игре.
 	if (vspeed > 0) {
 		top_left.y -= vspeed;
 		vspeed = 0;
